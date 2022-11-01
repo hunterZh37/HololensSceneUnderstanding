@@ -27,7 +27,8 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
         Quad,
         QuadWithMask,
         Mesh,
-        Wireframe
+        Wireframe,
+        BothQuadAndMesh
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -520,8 +521,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
                 if (sceneToUnityTransformAsMatrix4x4 != null)
                 {
-                    // If there was previously a scene displayed in the game world, destroy it
-                    // to avoid overlap with the new scene about to be displayed
+                    
                     DestroyAllGameObjectsUnderParent(SceneRoot.transform);
 
                     // Allow from one frame to yield the coroutine back to the main thread
@@ -567,10 +567,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             }
         }
 
-        /// <summary>
-        /// Create a Unity Game Object for an individual Scene Understanding Object
-        /// </summary>
-        /// <param name="suObject">The Scene Understanding Object to generate in Unity</param>
+       
         private bool DisplaySceneObject(SceneUnderstanding.SceneObject suObject)
         {
             if (suObject == null)
@@ -679,17 +676,9 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             return true;
         }
 
-        /// <summary>
-        /// Create a world Mesh Unity Object that represents the World Mesh Scene Understanding Object
-        /// </summary>
-        /// <param name="suObject">The Scene Understanding Object to generate in Unity</param>
         private List<GameObject> CreateWorldMeshInUnity(SceneUnderstanding.SceneObject suObject)
         {
-            // The World Mesh Object is different from the rest of the Scene Understanding Objects
-            // in the Sense that its unity representation is not affected by the filters or Request Modes
-            // in this component, the World Mesh Renders even of the Scene Objects are disabled and
-            // the World Mesh is always represented with a WireFrame Material, different to the Scene
-            // Understanding Objects whose materials vary depending on the Settings in the component
+            //wireframe
 
             IEnumerable<SceneUnderstanding.SceneMesh> suMeshes = suObject.Meshes;
             Mesh unityMesh = GenerateUnityMeshFromSceneObjectMeshes(suMeshes);
@@ -713,23 +702,17 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             return new List<GameObject> { gameObjToReturn };
         }
 
-        /// <summary>
-        /// Create a list of Unity GameObjects that represent all the Meshes/Geometry in a Scene
-        /// Understanding Object
-        /// </summary>
-        /// <param name="suObject">The Scene Understanding Object to generate in Unity</param>
+        
         private List<GameObject> CreateSUObjectInUnity(SceneUnderstanding.SceneObject suObject)
         {
-            // Each SU object has a specific type, query for its correspoding color
-            // according to its type
+            
             Color? color = GetColor(suObject.Kind);
             int layer = GetLayer(suObject.Kind);
 
             List<GameObject> listOfGeometryGameObjToReturn = new List<GameObject>();
             //Create the Quad SceneObjects first
             {
-                // If the Request Settings are requesting quads, create a gameobject in unity for
-                // each quad in the Scene Object
+                
                 foreach (SceneUnderstanding.SceneQuad quad in suObject.Quads)
                 {
                     Mesh unityMesh = GenerateUnityMeshFromSceneObjectQuad(quad);
@@ -794,7 +777,11 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     //If the render mode isn't Quad mode disable the gameobject
                     if(SceneObjectRequestMode != RenderMode.Quad && SceneObjectRequestMode != RenderMode.QuadWithMask)
                     {
-                        gameObjectToReturn.SetActive(false);
+                        //gameObjectToReturn.SetActive(false);
+                    }
+                    else if (SceneObjectRequestMode == RenderMode.BothQuadAndMesh)
+                    {
+                        //gameObjectToReturn.SetActive(true);
                     }
 
                     // Add to list
@@ -890,7 +877,10 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     //If the render mode isn't Mesh or WireFrame mode disable the gameobject
                     if (SceneObjectRequestMode != RenderMode.Mesh && SceneObjectRequestMode != RenderMode.Wireframe)
                     {
-                        gameObjectToReturn.SetActive(false);
+                        //gameObjectToReturn.SetActive(false);
+                    }
+                    else if (SceneObjectRequestMode == RenderMode.BothQuadAndMesh) {
+                        //gameObjectToReturn.SetActive(true);
                     }
 
                     // Add to list
@@ -1222,13 +1212,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
         }
 
 
-        /// <summary>
-        /// Function to add a Mesh to a Unity Object
-        /// </summary>
-        /// <param name="unityObject">The unity object to where the mesh will be applied </param>
-        /// <param name="mesh"> Mesh to be applied                                       </param>
-        /// <param name="color"> Color to apply to the Mesh                              </param>
-        /// <param name="material"> Material to apply to the unity Mesh Renderer         </param>
+        
         private void AddMeshToUnityObject(GameObject unityObject, Mesh mesh, Color? color, Material material)
         {
             if (unityObject == null || mesh == null || material == null)
@@ -1243,9 +1227,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             mr.sharedMaterial = material;
         }
 
-        /// <summary>
-        /// Apply Region mask to a Scene Object
-        /// </summary>
+       
         private void ApplyQuadRegionMask(SceneUnderstanding.SceneQuad quad, GameObject gameobject, Color color)
         {
             if (quad == null || gameobject == null)
