@@ -225,16 +225,12 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
         {
             SceneRoot = SceneRoot == null ? new GameObject("Scene Root") : SceneRoot;
 
-            // Considering that device is currently not supported in the editor means that
-            // if the application is running in the editor it is for sure running on PC and
-            // not a device. this assumption, for now, is always true.
+            
             RunOnDevice = !Application.isEditor;
 
             if (QuerySceneFromDevice)
             {
-                // Figure out if the application is setup to allow querying a scene from device
-
-                // The app must not be running in the editor
+                
                 if (Application.isEditor)
                 {
                     Debug.LogError("SceneUnderstandingManager.Start: Running in editor while quering scene from a device is not supported.\n" +
@@ -256,8 +252,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     return;
                 }
 
-                // If the application is capable of querying a scene from the device,
-                // start and endless task that queries for the lastest scene at all times
+                
                 try
                 {
 #pragma warning disable CS4014
@@ -273,7 +268,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
         private async void Update()
         {
-            // If the scene is being queried from the device, then allow for autorefresh
+           
             if (QuerySceneFromDevice)
             {
                 if (AutoRefresh)
@@ -293,8 +288,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     }
                 }
             }
-            // If the scene is pre-loaded from disk, display it only once, as consecutive renders
-            // will only bring the same result
+           
             else if (!DisplayFromDiskStarted)
             {
                 DisplayFromDiskStarted = true;
@@ -313,8 +307,6 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
         #region Data Querying and Consumption
 
-        // It is recommended to deserialize a scene from scene fragments
-        // consider all scenes as made up of scene fragments, even if only one.
         private SceneFragment GetLatestSceneSerialization()
         {
             SceneFragment fragmentToReturn = null;
@@ -329,7 +321,6 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
                     Array.Copy(LatestSUSceneData, sceneBytes, sceneLength);
 
-                    // Deserialize the scene into a Scene Fragment
                     fragmentToReturn = SceneFragment.Deserialize(sceneBytes);
                 }
             }
@@ -380,14 +371,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             }
         }
 
-        /// <summary>
-        /// Calls into the Scene Understanding APIs, to retrieve the latest scene as a byte array.
-        /// </summary>
-        /// <param name="enableQuads">When enabled, quad representation of scene objects is retrieved.</param>
-        /// <param name="enableMeshes">When enabled, mesh representation of scene objects is retrieved.</param>
-        /// <param name="enableInference">When enabled, both observed and inferred scene objects are retrieved. Otherwise, only observed scene objects are retrieved.</param>
-        /// <param name="enableWorldMesh">When enabled, retrieves the world mesh.</param>
-        /// <param name="lod">If world mesh is enabled, lod controls the resolution of the mesh returned.</param>
+       
         private void RetrieveData(float boundingSphereRadiusInMeters, bool enableQuads, bool enableMeshes, bool enableInference, bool enableWorldMesh, SceneUnderstanding.SceneMeshLevelOfDetail lod)
         {
             //Debug.Log("SceneUnderstandingManager.RetrieveData: Started.");
@@ -438,14 +422,9 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
         #endregion
 
-        #region Display Data into Unity
+        #region Display Byte Data in Unity
 
-        /// <summary>
-        /// Displays the most recently updated SU data as Unity game objects.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="Task"/> that represents the operation.
-        /// </returns>
+        
         public Task DisplayDataAsync()
         {
             // See if we already have a running task
@@ -475,13 +454,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             }
         }
 
-        /// <summary>
-        /// This coroutine will deserialize the latest SU data, either queried from the device
-        /// or from disk and use it to create Unity Objects that represent that geometry
-        /// </summary>
-        /// <param name="completionSource">
-        /// The <see cref="TaskCompletionSource{TResult}"/> that can be used to signal the coroutine is complete.
-        /// </param>
+        
         private IEnumerator DisplayDataRoutine(TaskCompletionSource<bool> completionSource)
         {
             Debug.Log("SceneUnderstandingManager.DisplayData: About to display the latest set of Scene Objects");
@@ -1711,10 +1684,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             await Task.WhenAll(tasks);
         }
 
-        /// <summary>
-        /// Save the generated Unity Objects from Scene Understanding as Obj files
-        /// to disk (all objects of one kind as one obj file)
-        /// </summary>
+       
         private async Task SaveAllSceneObjectsOfAKindAsOneObj(List<SceneUnderstanding.SceneObject> sceneObjects, Color? color, string fileName)
         {
             if (sceneObjects == null)

@@ -493,7 +493,7 @@ PrefabInstance:
     - target: {fileID: 1654952326856315522, guid: a9b7988b52547e14899219ced698f6b2,
         type: 3}
       propertyPath: MeshQuality
-      value: 255
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1654952326856315522, guid: a9b7988b52547e14899219ced698f6b2,
         type: 3}
@@ -534,6 +534,11 @@ PrefabInstance:
         type: 3}
       propertyPath: FilterWallSceneObjects
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1654952326856315522, guid: a9b7988b52547e14899219ced698f6b2,
+        type: 3}
+      propertyPath: RequestInferredRegions
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1654952326856315522, guid: a9b7988b52547e14899219ced698f6b2,
         type: 3}
@@ -672,18 +677,18 @@ PrefabInstance:
     - target: {fileID: 1654952326856315522, guid: a9b7988b52547e14899219ced698f6b2,
         type: 3}
       propertyPath: FilterCompletelyInferredSceneObjects
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1654952326856315522, guid: a9b7988b52547e14899219ced698f6b2,
         type: 3}
       propertyPath: SUSerializedScenePaths.Array.data[0]
       value: 
-      objectReference: {fileID: 4900000, guid: e69eaa6a2d332ff4cbe3920f3da6ce64, type: 3}
+      objectReference: {fileID: 4900000, guid: c2fa70c16bacb0741bb7d94ddcb87405, type: 3}
     - target: {fileID: 1654952326856315522, guid: a9b7988b52547e14899219ced698f6b2,
         type: 3}
       propertyPath: SUSerializedScenePaths.Array.data[1]
       value: 
-      objectReference: {fileID: 4900000, guid: a3ac62f334ff6c64687a97120f334411, type: 3}
+      objectReference: {fileID: 4900000, guid: c2fa70c16bacb0741bb7d94ddcb87405, type: 3}
     - target: {fileID: 1654952326856315522, guid: a9b7988b52547e14899219ced698f6b2,
         type: 3}
       propertyPath: SUSerializedScenePaths.Array.data[2]
@@ -913,6 +918,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SceneUnderstandingMenu
+      objectReference: {fileID: 0}
+    - target: {fileID: 8426562319953196663, guid: 9e92419956a00654aafabc6885e89266,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8426562319953196664, guid: 9e92419956a00654aafabc6885e89266,
         type: 3}
