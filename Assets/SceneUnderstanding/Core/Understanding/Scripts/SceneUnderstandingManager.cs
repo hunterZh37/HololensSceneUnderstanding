@@ -715,17 +715,36 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                 
                 foreach (SceneUnderstanding.SceneQuad quad in suObject.Quads)
                 {
+                    
                     Mesh unityMesh = GenerateUnityMeshFromSceneObjectQuad(quad);
 
                     Material tempMaterial = GetMaterial(suObject.Kind, SceneObjectRequestMode);
 
                     GameObject gameObjectToReturn = new GameObject(suObject.Kind.ToString() + "Quad");
                     gameObjectToReturn.layer = layer;
-                    AddMeshToUnityObject(gameObjectToReturn, unityMesh, color, tempMaterial);
+                   // AddMeshToUnityObject(gameObjectToReturn, unityMesh, color, tempMaterial);
+                    var gameQuad = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+                    gameQuad.transform.SetParent(gameObjectToReturn.transform, false);
+                   
+
+
+                    gameQuad.transform.localScale = new Vector3(
+                        quad.Extents.X, quad.Extents.Y, 0.025f);
+
+                    if (AlignSUObjectsNormalToUnityYAxis)
+                    {
+                        // Rotate our Vertex Data to match our Object's Normal vector to Unity's coordinate system Up Axis (Y axis)
+                        Quaternion rot = Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                        gameQuad.transform.rotation *= rot;
+
+                    }
+
+                    gameQuad.GetComponent<Renderer>().material = tempMaterial;
 
                     if (SceneObjectRequestMode == RenderMode.QuadWithMask)
                     {
-                        ApplyQuadRegionMask(quad, gameObjectToReturn, color.Value);
+                       // ApplyQuadRegionMask(gameQuad, gameObjectToReturn, color.Value);
                     }
 
                     switch(suObject.Kind)
@@ -777,7 +796,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     //If the render mode isn't Quad mode disable the gameobject
                     if(SceneObjectRequestMode != RenderMode.Quad && SceneObjectRequestMode != RenderMode.QuadWithMask)
                     {
-                        //gameObjectToReturn.SetActive(false);
+                        gameObjectToReturn.SetActive(false);
                     }
                     else if (SceneObjectRequestMode == RenderMode.BothQuadAndMesh)
                     {
@@ -877,7 +896,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     //If the render mode isn't Mesh or WireFrame mode disable the gameobject
                     if (SceneObjectRequestMode != RenderMode.Mesh && SceneObjectRequestMode != RenderMode.Wireframe)
                     {
-                        //gameObjectToReturn.SetActive(false);
+                        gameObjectToReturn.SetActive(false);
                     }
                     else if (SceneObjectRequestMode == RenderMode.BothQuadAndMesh) {
                         //gameObjectToReturn.SetActive(true);
