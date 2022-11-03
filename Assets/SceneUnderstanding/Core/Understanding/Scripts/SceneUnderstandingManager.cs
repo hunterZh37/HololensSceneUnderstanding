@@ -730,7 +730,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
 
                     gameQuad.transform.localScale = new Vector3(
-                        quad.Extents.X, quad.Extents.Y, 0.025f);
+                        quad.Extents.X, quad.Extents.Y, 0.25f);
 
                     if (AlignSUObjectsNormalToUnityYAxis)
                     {
