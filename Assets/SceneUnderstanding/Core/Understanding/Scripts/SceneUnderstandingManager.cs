@@ -44,6 +44,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
     public class SceneUnderstandingManager : MonoBehaviour
     {
         #region Public Variables
+        public List<GameObject> SceneGameObjectList = new List<GameObject>(0);
 
         [Header("Data Loader Mode")]
         [Tooltip("When enabled, the scene will be queried from a device (e.g Hololens). Otherwise, a previously saved, serialized scene will be loaded and served from your PC.")]
@@ -226,12 +227,12 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
         {
             SceneRoot = SceneRoot == null ? new GameObject("Scene Root") : SceneRoot;
 
-            
+
             RunOnDevice = !Application.isEditor;
 
             if (QuerySceneFromDevice)
             {
-                
+
                 if (Application.isEditor)
                 {
                     Debug.LogError("SceneUnderstandingManager.Start: Running in editor while quering scene from a device is not supported.\n" +
@@ -253,7 +254,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     return;
                 }
 
-                
+
                 try
                 {
 #pragma warning disable CS4014
@@ -269,7 +270,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
         private async void Update()
         {
-           
+
             if (QuerySceneFromDevice)
             {
                 if (AutoRefresh)
@@ -289,7 +290,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     }
                 }
             }
-           
+
             else if (!DisplayFromDiskStarted)
             {
                 DisplayFromDiskStarted = true;
@@ -346,9 +347,9 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
         {
             Scene sceneToReturn = null;
 
-            lock(cachedDeserializedSceneLock)
+            lock (cachedDeserializedSceneLock)
             {
-                if(cachedDeserializedScene != null)
+                if (cachedDeserializedScene != null)
                 {
                     sceneToReturn = cachedDeserializedScene;
                 }
@@ -372,7 +373,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             }
         }
 
-       
+
         private void RetrieveData(float boundingSphereRadiusInMeters, bool enableQuads, bool enableMeshes, bool enableInference, bool enableWorldMesh, SceneUnderstanding.SceneMeshLevelOfDetail lod)
         {
             //Debug.Log("SceneUnderstandingManager.RetrieveData: Started.");
@@ -425,7 +426,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
         #region Display Byte Data in Unity
 
-        
+
         public Task DisplayDataAsync()
         {
             // See if we already have a running task
@@ -455,13 +456,13 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             }
         }
 
-        
+
         private IEnumerator DisplayDataRoutine(TaskCompletionSource<bool> completionSource)
         {
             Debug.Log("SceneUnderstandingManager.DisplayData: About to display the latest set of Scene Objects");
-            
+
             //We are about to deserialize a new Scene, if we have a cached scene, dispose it.
-            if(cachedDeserializedScene != null)
+            if (cachedDeserializedScene != null)
             {
                 cachedDeserializedScene.Dispose();
                 cachedDeserializedScene = null;
@@ -521,7 +522,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
                 if (sceneToUnityTransformAsMatrix4x4 != null)
                 {
-                    
+
                     DestroyAllGameObjectsUnderParent(SceneRoot.transform);
 
                     // Allow from one frame to yield the coroutine back to the main thread
@@ -567,7 +568,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             }
         }
 
-       
+
         private bool DisplaySceneObject(SceneUnderstanding.SceneObject suObject)
         {
             if (suObject == null)
@@ -652,7 +653,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                 geometryObject.transform.parent = unityParentHolderObject.transform;
                 geometryObject.transform.localPosition = Vector3.zero;
 
-                if(AlignSUObjectsNormalToUnityYAxis)
+                if (AlignSUObjectsNormalToUnityYAxis)
                 {
                     // If our Vertex Data is rotated to have it match its Normal to Unity's Y axis, we need to offset the rotation
                     // in the parent object to have the object face the right direction
@@ -673,6 +674,8 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             properties.suObjectKind = suObject.Kind;
 
             //Return that the Scene Object was indeed represented as a unity object and wasn't skipped
+            //SaveToJson(unityGeometryObjects);
+            SceneGameObjectList.Add(unityParentHolderObject);
             return true;
         }
 
@@ -702,31 +705,31 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             return new List<GameObject> { gameObjToReturn };
         }
 
-        
+
         private List<GameObject> CreateSUObjectInUnity(SceneUnderstanding.SceneObject suObject)
         {
-            
+
             Color? color = GetColor(suObject.Kind);
             int layer = GetLayer(suObject.Kind);
 
             List<GameObject> listOfGeometryGameObjToReturn = new List<GameObject>();
             //Create the Quad SceneObjects first
             {
-                
+
                 foreach (SceneUnderstanding.SceneQuad quad in suObject.Quads)
                 {
-                    
+
                     Mesh unityMesh = GenerateUnityMeshFromSceneObjectQuad(quad);
 
                     Material tempMaterial = GetMaterial(suObject.Kind, SceneObjectRequestMode);
 
                     GameObject gameObjectToReturn = new GameObject(suObject.Kind.ToString() + "Quad");
                     gameObjectToReturn.layer = layer;
-                   // AddMeshToUnityObject(gameObjectToReturn, unityMesh, color, tempMaterial);
+                    // AddMeshToUnityObject(gameObjectToReturn, unityMesh, color, tempMaterial);
                     var gameQuad = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
                     gameQuad.transform.SetParent(gameObjectToReturn.transform, false);
-                   
+
 
 
                     gameQuad.transform.localScale = new Vector3(
@@ -744,13 +747,13 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
                     if (SceneObjectRequestMode == RenderMode.QuadWithMask)
                     {
-                       // ApplyQuadRegionMask(gameQuad, gameObjectToReturn, color.Value);
+                        // ApplyQuadRegionMask(gameQuad, gameObjectToReturn, color.Value);
                     }
 
-                    switch(suObject.Kind)
+                    switch (suObject.Kind)
                     {
                         case SceneObjectKind.Background:
-                            if(AddCollidersInBackgroundSceneObjects)
+                            if (AddCollidersInBackgroundSceneObjects)
                             {
                                 gameObjectToReturn.AddComponent<BoxCollider>();
                             }
@@ -794,7 +797,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                     }
 
                     //If the render mode isn't Quad mode disable the gameobject
-                    if(SceneObjectRequestMode != RenderMode.Quad && SceneObjectRequestMode != RenderMode.QuadWithMask)
+                    if (SceneObjectRequestMode != RenderMode.Quad && SceneObjectRequestMode != RenderMode.QuadWithMask)
                     {
                         gameObjectToReturn.SetActive(false);
                     }
@@ -909,13 +912,114 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
             // Return all the Geometry GameObjects that represent a Scene
             // Understanding Object
+            //SaveToJson(listOfGeometryGameObjToReturn);
+            //Debug.Log("the size of the list is " + listOfGeometryGameObjToReturn.Count);
             return listOfGeometryGameObjToReturn;
         }
 
-        /// <summary>
-        /// Create a unity Mesh from a set of Scene Understanding Meshes
-        /// </summary>
-        /// <param name="suMeshes">The Scene Understanding mesh to generate in Unity</param>
+        [System.Serializable]
+        public class SaveLoadRoot {
+            public string objName;
+            public Vector3 position;
+            public Quaternion rotation;
+            public Vector3 scale;
+            public List<SaveLoadParent> parentList;
+        }
+
+
+        [System.Serializable]
+        public class SaveLoadParent {
+            public string objName;
+            public Vector3 position;
+            public Quaternion rotation;
+            public Vector3 scale;
+            public SaveLoadChild child;
+        }
+        [System.Serializable]
+        public class SaveLoadChild {
+            public string objName;
+            public Vector3 position;
+            public Quaternion rotation;
+            public Vector3 scale;
+            public SaveLoadShape shape;
+        }
+        [System.Serializable]
+        public class SaveLoadShape {
+            public Vector3 position;
+            public Quaternion rotation;
+            public Vector3 scale;
+        }
+
+        public void SaveToJson(List<GameObject> list)
+        {
+            Debug.Log("the size in the list is : " + list.Count);
+            if (list.Count != 0)
+            {
+                var sb = new StringBuilder();
+
+                SaveLoadRoot root = new SaveLoadRoot();
+                root.objName = SceneRoot.name;
+                root.position = SceneRoot.transform.position;
+                root.rotation = SceneRoot.transform.rotation;
+                root.scale = SceneRoot.transform.localScale;
+                //string json = JsonUtility.ToJson(root);
+                //Debug.Log(json.ToString());
+                //sb.AppendLine(json);
+
+
+                List<SaveLoadParent> parentList = new List<SaveLoadParent>(0);
+
+                foreach (GameObject shape in list) {
+                    SaveLoadParent parent = new SaveLoadParent();
+                    parent.objName = shape.name;
+                    parent.position = shape.transform.localPosition;
+                    parent.rotation = shape.transform.localRotation;
+                    parent.scale = shape.transform.localScale;
+
+                    GameObject childGameObject = shape.transform.GetChild(0).gameObject;
+                    
+                    SaveLoadChild child = new SaveLoadChild();
+                    
+                    child.objName = childGameObject.name;
+                    child.position = childGameObject.transform.localPosition;
+                    child.rotation = childGameObject.transform.localRotation;
+                    child.scale = childGameObject.transform.localScale;
+
+                    GameObject shapeGameObject = childGameObject.transform.GetChild(0).gameObject;
+                    
+                    SaveLoadShape childShape = new SaveLoadShape();
+                    childShape.position = shapeGameObject.transform.localPosition;
+                    childShape.rotation = shapeGameObject.transform.localRotation;
+                    childShape.scale = shapeGameObject.transform.localScale;
+
+                    child.shape = childShape;
+                    parent.child = child;
+                    parentList.Add(parent);
+
+
+                    //string json1 = JsonUtility.ToJson(parent);
+                    //Debug.Log(json.ToString());
+                    //sb.AppendLine(json1);
+
+                }
+                root.parentList = parentList;
+                 string json = JsonUtility.ToJson(root);
+                //Debug.Log(json.ToString());
+                 sb.AppendLine(json);
+
+
+
+
+                File.WriteAllText(Application.dataPath + "/GameObjectData.json", sb.ToString());
+                Debug.Log("your data is saved at " + Application.dataPath + "/GameObjectData.json");
+            }
+            else {
+                Debug.Log("Not found");            
+            }
+
+
+        }
+
         private Mesh GenerateUnityMeshFromSceneObjectMeshes(IEnumerable<SceneUnderstanding.SceneMesh> suMeshes)
         {
             if (suMeshes == null)
@@ -949,6 +1053,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
                 {
                     // Here Z is negated because Unity Uses Left handed Coordinate system and Scene Understanding uses Right Handed
                     combinedMeshVertices.Add(new Vector3(meshVertices[i].X, meshVertices[i].Y, -meshVertices[i].Z));
+                   // combinedMeshVertices.Add(new Vector3(meshVertices[i].X, meshVertices[i].Y, -0.25f));
                 }
 
                 for (int i = 0; i < meshIndices.Length; i++)
@@ -986,10 +1091,7 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             return unityMesh;
         }
 
-        /// <summary>
-        /// Create a Unity Mesh from a Scene Understanding Quad
-        /// </summary>
-        /// <param name="suQuad">The Scene Understanding quad to generate in Unity</param>
+     
         private Mesh GenerateUnityMeshFromSceneObjectQuad(SceneUnderstanding.SceneQuad suQuad)
         {
             if (suQuad == null)
@@ -1472,17 +1574,15 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
             }
         }
 
-        
+
         #endregion
 
         #region Out of PlayMode Functions
-
-        /// <summary>
-        /// This function will generate the Unity Scene that represents the Scene
-        /// Understanding Scene without needing to use the play button
-        /// </summary>
+        
+       
         public void BakeScene()
         {
+
             Debug.Log("[IN EDITOR] SceneUnderStandingManager.BakeScene: Bake Started");
             DestroyImmediate(SceneRoot.gameObject);
             if (!QuerySceneFromDevice)
@@ -1524,6 +1624,8 @@ namespace Microsoft.MixedReality.SceneUnderstanding.Samples.Unity
 
                 Debug.Log("[IN EDITOR] SceneUnderStandingManager.BakeScene: Display Completed");
             }
+
+            SaveToJson(SceneGameObjectList);
         }
 
         #endregion
